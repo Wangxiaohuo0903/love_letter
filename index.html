@@ -7,7 +7,6 @@
     <style>
         :root {
             --primary-color: #ff6b81;
-            --secondary-color: #ff9f43;
         }
 
         * {
@@ -22,6 +21,7 @@
             color: #fff;
             overflow: hidden;
             position: relative;
+            touch-action: pan-y;
         }
 
         /* 歌词式滚动容器 */
@@ -34,16 +34,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            perspective: 1000px;
             overflow: hidden;
         }
 
         .lyric-content {
-            position: relative;
-            transform-style: preserve-3d;
-            transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
             overflow-y: scroll;
             max-height: 80vh;
+            width: 80%;
+            scroll-behavior: smooth;
         }
 
         .lyric-line {
@@ -52,202 +50,264 @@
             text-align: center;
             opacity: 0.3;
             transition: all 0.6s ease;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            padding: 10px;
-            cursor: pointer;
+            padding: 20px 0;
+            min-height: 100px;
         }
 
         .lyric-line.active {
             opacity: 1;
-            transform: scale(1.1);
+            transform: scale(1.15);
             color: var(--primary-color);
+            text-shadow: 0 0 20px var(--primary-color);
         }
 
-        /* 动态漂浮元素 */
-        .float-element {
+        /* 点击桃心效果 */
+        .click-heart {
             position: absolute;
-            pointer-events: none;
-            animation: float 8s linear infinite;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+            width: 40px;
+            height: 40px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff6b81" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+            animation: heartPop 0.8s ease-out forwards;
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(110vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-30vh) rotate(360deg);
-                opacity: 0;
-            }
+        @keyframes heartPop {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0); opacity: 0; }
         }
 
-        /* 爱心样式 */
-        .heart {
+        /* 常态桃心雨 */
+        .heart-rain {
+            position: absolute;
             width: 28px;
             height: 28px;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff6b81" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
+            animation: heartFall linear forwards;
         }
 
-        /* 柔光滤镜 */
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.4) 100%);
-            mix-blend-mode: overlay;
-            pointer-events: none;
-        }
-
-        /* 点击时的水波纹效果 */
-        .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 107, 129, 0.5);
-            animation: ripple-animation 0.6s ease-out;
-        }
-
-        @keyframes ripple-animation {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(4);
-                opacity: 0;
-            }
+        @keyframes heartFall {
+            0% { transform: translateY(-20vh) rotate(0deg); }
+            100% { transform: translateY(120vh) rotate(360deg); }
         }
     </style>
 </head>
 <body>
-
-<!-- 情书容器 -->
-<div class="lyric-container">
-    <div class="lyric-content">
-        <!-- 此处自动生成情书内容 -->
+    <!-- 情书容器 -->
+    <div class="lyric-container">
+        <div class="lyric-content">
+            <!-- 此处自动生成情书内容 -->
+        </div>
     </div>
-</div>
 
-<!-- 音频播放器 -->
-<audio id="loveSong" autoplay>
-    <source src="安溥 anpu - 天高地阔.mp3" type="audio/mp3">
-    Your browser does not support the audio element.
-</audio>
+    <!-- 音频播放器 -->
+    <audio id="loveSong">
+        <source src="安溥 anpu - 天高地阔.mp3" type="audio/mp3">
+    </audio>
 
-<script>
-// 情书内容（按逗号分隔）
-const loveLetter = `
-好喜欢的你：
-            想正式的给你写一封信，
-            但其实没想好要写什么，
-            不能写1000字的“好喜欢你呀，你也太可爱了吧”，
-            尽管可能就是想表达这个意思，
-            和你在一起真的很幸福，很安心，
-            不知道为什么在你身边总会让我感觉到平静，
-            有可能是因为我相信你是一个很美好的人，
-            你有很多我不具备的特点，
-            你有一种奇妙的勇气，
-            会在我不好意思找人拍照的时候挺身而出，
-            会在很多时候直接告诉我你的想法，
-            虽然你总说自己不会表达爱，
-            但你真的让我在很多个瞬间都感受到了你的喜欢，
-            让我很有安全感和幸福感，
-            第一次意识到相爱真的是很美好的事情，
-            我喜欢你，也相信你也喜欢我，
-            我也会害怕这种喜欢会不会又成为我逃避现实的借口，
-            但似乎没有，我依然在不断担心各种各样的事情，
-            我希望自己的事业也有更好的发展，
-            这样也能让我们的感情有更多的稳定性去面对真实的生活，
-            但很幸运我们理想的生活状态都是平凡的美好，
-            并不追求过多的物欲，
-            我们仍有在生活之余追求浪漫的自由，
-`.split(/，|。/).filter(line => line.trim());
+    <script>
+    // 情书内容
+    const loveLetter = [
+       "想正式的给你写一封信",
+"但其实没想好要写什么",
+"不能写1000字的“好喜欢你呀，你也太可爱了吧”",
+"尽管可能就是想表达这个意思",
+"和你在一起真的很幸福，很安心",
+"不知道为什么在你身边总会让我感觉到平静",
+"有可能是因为我相信你是一个很美好的人",
+"你有很多我不具备的特点",
+"你有一种奇妙的勇气",
+"会在我不好意思找人拍照的时候挺身而出",
+"会在很多时候直接告诉我你的想法",
+"虽然你总说自己不会表达爱",
+"但你真的让我在很多个瞬间都感受到了你的喜欢",
+"让我很有安全感和幸福感",
+"第一次意识到相爱真的是很美好的事情",
+"我喜欢你，也相信你也喜欢我",
+"我也会害怕这种喜欢会不会又成为我逃避现实的借口",
+"但似乎没有，我依然在不断担心各种各样的事情",
+"我希望自己的事业也有更好的发展",
+"这样也能让我们的感情有更多的稳定性去面对真实的生活",
+"但很幸运我们理想的生活状态都是平凡的美好",
+"并不追求过多的物欲",
+"我们仍有在生活之余追求浪漫的自由",
+"我大学的时候很害怕对方不喜欢我",
+"我觉得自己是没有什么闪光点的人",
+"没有任何的才华，学业也一般般",
+"辩论的论点也多是拾人牙慧",
+"我觉得这样的自己没有吸引力",
+"我只能通过对对方好来证明自己的价值",
+"能以此说服自己我是值得被对方喜欢的",
+"考完研后第一次被人喜欢很意外",
+"读研后更是有种幸运捡漏的感觉",
+"但很快我发现是台上的我",
+"或者我私下里呈现的自己",
+"确实存在一些对异性的吸引力",
+"但那并不是我平时的状态",
+"我每次试图和对方表露自己的问题",
+"渴望得到对方理解",
+"我希望能确信对方喜欢的我是我所理解的真正的自己",
+"而不是我的某一个侧面",
+"但每次都会失望",
+"我总觉得对方喜欢的那个我是一个滤镜后的我",
+"而我自己也很难克服自己mean的问题",
+"我怀疑是自己既要优雅，标准高的不现实",
+"我也无法喜欢上真正的对方",
+"但和你没有这种困扰",
+"我每了解你多一点",
+"每发现你的一个新的细节",
+"都会更喜欢你",
+"而我也不担心你喜欢的我和我所理解的自己有没有偏差",
+"因为和你相处我基本都是很舒服很放松的状态",
+"而不是那种需要社交能量的状态",
+"我对自己最喜欢的状态",
+"是我可以为了感性的事情做决定",
+"然后用理性去执行它",
+"因为我在以前的教育环境下",
+"经常要么总是功利的理性思维",
+"要么有感性的想法却永远停留在想法",
+"很少我能做到我想要的状态",
+"而这次为了你搬家（虽然找了很多借口合理化自己的行为）",
+"但其实只是想和你不只是周末见面出去玩的情侣",
+"希望和你有更多日常的生活",
+"我之前在北京租房搬了好几次",
+"每次我都只是觉得到了一个新的房子",
+"我从来没有过“家”或者这是一个属于我的空间的感觉",
+"只有这次，我会想要它更有生活气息",
+"因为在这样的空间里",
+"我会有和你一起生活的实感",
+"我会离生活里的你更近一些",
+"而在推进这些事里",
+"我好像间歇性的变成了更好的自己",
+"当然我也有很多小的顾虑",
+"比如我其实很邋遢，东西经常乱丢",
+"生活常识也有一搭没一搭",
+"很多地方不干不净的",
+"很害怕你会因为某些行为嫌弃我",
+"如果真的有发生请你告诉我",
+"我会想办法改的",
+"我对爱情的想法总在变",
+"从最开始完全没概念",
+"中二的自我中心",
+"到把对方当作生命意义来逃避真实的生活和自己",
+"再到对恋爱本身祛魅和无感",
+"不知道人为什么要恋爱",
+"厌倦了一遍遍的和别人讲自己讲了很多遍的故事来加深和对方的了解",
+"只会偶尔有心动的瞬间",
+"但不再能有持久的热烈",
+"直到你出现",
+"原来我可以在保有自我的同时",
+"非常非常喜欢一个人",
+"尤其是最近",
+"越来越强烈的想对你说我爱你",
+"你问我为什么说",
+"我不知道，就是话到嘴边",
+"每次都觉得说了是不是有点怪",
+"但咽下去几次，它又跑上来",
+"非要咻的一下脱口而出",
+"真的是脱口咻啊",
+"我不觉得这意味着什么明确的态度或者清晰的想法",
+"只是我好想告诉你，我爱你",
+"尽管我可能还没那么了解你",
+"但我想更多了解你",
+"想和你有更久更美好的生命体验",
+"我不敢说自己现在喜欢的是全部的你",
+"但我肯定，现在全部的我都在喜欢你",
+"高尚的我自私的我",
+"浪漫的我无趣的我",
+"自律的我懒惰的我",
+"都在喜欢你",
+"情人节快乐，我深深喜欢的你",
+"爱你的我"
+    ];
 
-// 初始化
-function init() {
-    createLyrics();
-    startFloatElements();
-    addScrollEffect();
-    addClickEffect();
-}
+    // 初始化
+    function init() {
+        createLyrics();
+        setupScroll();
+        setupClick();
+        setupMusic();
+        startHeartRain();
+    }
 
-// 创建歌词式情书
-function createLyrics() {
-    const container = document.querySelector('.lyric-content');
-    loveLetter.forEach((text, index) => {
-        const p = document.createElement('p');
-        p.className = 'lyric-line';
-        p.textContent = text.trim();
-        container.appendChild(p);
-    });
-}
-
-// 动态漂浮元素
-function startFloatElements() {
-    setInterval(() => {
-        const elem = document.createElement('div');
-        elem.className = 'float-element heart';
-        elem.style.left = `${Math.random() * 100}%`;
-        elem.style.animationDuration = `${6 + Math.random() * 4}s`;
-        document.body.appendChild(elem);
-        setTimeout(() => elem.remove(), 8000);
-    }, 1000);
-}
-
-// 滚动效果
-function addScrollEffect() {
-    const container = document.querySelector('.lyric-content');
-    const lines = document.querySelectorAll('.lyric-line');
-    container.addEventListener('scroll', () => {
-        const scrollPosition = container.scrollTop;
-        const lineHeight = lines[0].offsetHeight;
-        const centerLineIndex = Math.floor(scrollPosition / lineHeight);
-        lines.forEach((line, i) => {
-            line.classList.remove('active');
-            if (i === centerLineIndex) {
-                line.classList.add('active');
-            }
+    // 创建歌词
+    function createLyrics() {
+        const container = document.querySelector('.lyric-content');
+        loveLetter.forEach(text => {
+            const p = document.createElement('p');
+            p.className = 'lyric-line';
+            p.textContent = text.trim();
+            container.appendChild(p);
         });
-    });
-}
+    }
 
-// 点击时桃心和水波纹效果
-function addClickEffect() {
-    document.body.addEventListener('click', (event) => {
-        const ripple = document.createElement('div');
-        ripple.classList.add('ripple');
-        document.body.appendChild(ripple);
+    // 滚动效果
+    function setupScroll() {
+        const container = document.querySelector('.lyric-content');
+        const lines = document.querySelectorAll('.lyric-line');
+        
+        container.addEventListener('scroll', () => {
+            const centerY = container.getBoundingClientRect().height / 2;
+            
+            lines.forEach(line => {
+                const rect = line.getBoundingClientRect();
+                const distance = Math.abs(rect.top + rect.height / 2 - centerY);
+                const scale = Math.max(0.8, 1 - distance / 500);
+                line.style.transform = `scale(${scale})`;
+                line.style.opacity = Math.max(0.3, 1 - distance / 300);
+                
+                if (distance < 50) {
+                    line.classList.add('active');
+                } else {
+                    line.classList.remove('active');
+                }
+            });
+        });
+    }
 
-        const size = Math.max(window.innerWidth, window.innerHeight);
-        const x = event.clientX - size / 2;
-        const y = event.clientY - size / 2;
+    // 点击效果
+    function setupClick() {
+        let isFirstClick = true;
+        
+        document.body.addEventListener('click', (e) => {
+            // 单次音乐播放
+            if (isFirstClick) {
+                document.getElementById('loveSong').play();
+                isFirstClick = false;
+            }
 
-        ripple.style.width = `${size}px`;
-        ripple.style.height = `${size}px`;
-        ripple.style.left = `${x}px`;
-        ripple.style.top = `${y}px`;
-
-        setTimeout(() => ripple.remove(), 600);
-
-        // 生成多个桃心
-        for (let i = 0; i < 5; i++) {
+            // 创建点击桃心
             const heart = document.createElement('div');
-            heart.className = 'heart';
-            heart.style.left = `${event.clientX + Math.random() * 50 - 25}px`;
-            heart.style.top = `${event.clientY + Math.random() * 50 - 25}px`;
-            heart.style.animationDuration = `${5 + Math.random() * 3}s`;
+            heart.className = 'click-heart';
+            heart.style.left = `${e.clientX - 20}px`;
+            heart.style.top = `${e.clientY - 20}px`;
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 800);
+        });
+    }
+
+    // 音乐处理
+    function setupMusic() {
+        const audio = document.getElementById('loveSong');
+        audio.volume = 0.5;
+        audio.loop = true;
+    }
+
+    // 常态桃心雨
+    function startHeartRain() {
+        setInterval(() => {
+            const heart = document.createElement('div');
+            heart.className = 'heart-rain';
+            heart.style.left = `${Math.random() * 100}%`;
+            heart.style.animationDuration = `${4 + Math.random() * 4}s`;
+            heart.style.fontSize = `${20 + Math.random() * 20}px`;
+            heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 5000);
-        }
-    });
-}
+        }, 1000); // 每秒生成一个桃心
+    }
 
-// 启动
-init();
-</script>
-
+    // 启动
+    init();
+    </script>
 </body>
 </html>
