@@ -20,91 +20,59 @@
             font-family: 'Helvetica Neue', sans-serif;
             background: #1a1a1a;
             color: #fff;
-            overflow: hidden;
             position: relative;
             touch-action: pan-y;
         }
 
-        /* 全屏滚动容器 */
+        /* 滚动容器 */
         .scroll-container {
-            height: 100vh;
-            overflow-y: scroll;
-            scroll-snap-type: y proximity;
+            padding: 20vh 0;
         }
 
-        /* 歌词式页面 */
-        .lyric-page {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            scroll-snap-align: start;
-            position: relative;
-        }
-
+        /* 歌词行样式 */
         .lyric-line {
             font-size: 1.6rem;
-            line-height: 1.8;
+            line-height: 2;
             text-align: center;
-            opacity: 0.4;
+            opacity: 0.3;
             transition: all 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
-            max-width: 80%;
-            margin: 10px 0;
+            padding: 15px 0;
+            margin: 0 20px;
+            transform-origin: center;
         }
 
         .lyric-line.active {
             opacity: 1;
-            transform: scale(1.2);
+            transform: scale(1.25);
             color: var(--primary-color);
-            text-shadow: 0 0 20px var(--primary-color);
+            text-shadow: 0 0 30px var(--primary-color);
         }
 
-        .lyric-line.above,
-        .lyric-line.below {
-            opacity: 0.6;
-            transform: scale(0.9);
-        }
-
-        /* 漂浮爱心 */
-        .float-heart {
+        /* 点击特效 */
+        .click-heart {
             position: absolute;
-            width: 28px;
-            height: 28px;
+            width: 40px;
+            height: 40px;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff6b81" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
-            animation: float 8s linear infinite;
+            animation: clickHeart 1s ease-out forwards;
         }
 
-        @keyframes float {
-            0% { transform: translateY(110vh) rotate(0deg); }
-            100% { transform: translateY(-30vh) rotate(360deg); }
-        }
-
-        /* 照片飘过效果 */
-        .photo-float {
-            position: absolute;
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            animation: float 12s linear infinite;
-            box-shadow: 0 0 20px rgba(255, 107, 129, 0.5);
-        }
-
-        /* 烟花效果 */
-        .firework {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ff6b81;
-            border-radius: 50%;
-            animation: explode 1.5s ease-out forwards;
-        }
-
-        @keyframes explode {
+        @keyframes clickHeart {
             0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(10); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0.5); opacity: 0; }
+        }
+
+        /* 结尾爱心雨 */
+        .heart-rain {
+            position: fixed;
+            pointer-events: none;
+            animation: heartFall linear forwards;
+        }
+
+        @keyframes heartFall {
+            0% { transform: translateY(-20vh) rotate(0deg); }
+            100% { transform: translateY(120vh) rotate(360deg); }
         }
     </style>
 </head>
@@ -114,15 +82,14 @@
         <source src="安溥 anpu - 天高地阔.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- 全屏滚动容器 -->
+    <!-- 滚动容器 -->
     <div class="scroll-container">
-        <!-- 此处自动生成情书页面 -->
+        <!-- 此处自动生成情书内容 -->
     </div>
 
     <script>
-        // 情书内容配置（已按逗号分隔）
-        const loveLetter = [
-"想正式的给你写一封信",
+        // 情书内容配置
+        const loveLetter = ["想正式的给你写一封信",
 "但其实没想好要写什么",
 "不能写1000字的“好喜欢你呀，你也太可爱了吧”",
 "尽管可能就是想表达这个意思",
@@ -232,100 +199,78 @@
 "自律的我懒惰的我",
 "都在喜欢你",
 "情人节快乐，我深深喜欢的你",
-"爱你的我"
-        ];
+"爱你的我"];
 
         // 初始化
         function init() {
-            createPages();
+            createLyrics();
             initScroll();
-            createHearts();
-            addPhotoFloat();
-            addFireworks();
+            initClickEffect();
         }
 
-        // 创建分页
-        function createPages() {
+        // 创建歌词
+        function createLyrics() {
             const container = document.querySelector('.scroll-container');
-            loveLetter.forEach((text, index) => {
-                const page = document.createElement('div');
-                page.className = 'lyric-page';
-                
+            loveLetter.forEach(text => {
                 const line = document.createElement('div');
                 line.className = 'lyric-line';
-                line.textContent = text.trim();
-                
-                page.appendChild(line);
-                container.appendChild(page);
-
-                // 在中间页面添加照片
-                if (index === Math.floor(loveLetter.length / 2)) {
-                    const photo = document.createElement('img');
-                    photo.src = 'her-photo.JPG'; // 替换为她的照片路径
-                    photo.className = 'photo-float';
-                    photo.style.left = `${Math.random() * 80 + 10}%`;
-                    photo.style.animationDelay = `${Math.random() * 2}s`;
-                    page.appendChild(photo);
-                }
+                line.textContent = text;
+                container.appendChild(line);
             });
         }
 
         // 初始化滚动交互
         function initScroll() {
-            const pages = document.querySelectorAll('.lyric-page');
+            const lines = document.querySelectorAll('.lyric-line');
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(entry => {
+                    const line = entry.target;
                     if (entry.isIntersecting) {
-                        const lines = entry.target.querySelectorAll('.lyric-line');
-                        lines.forEach((line, i) => {
-                            line.classList.remove('active', 'above', 'below');
-                            if (i === 1) line.classList.add('active');
-                            if (i === 0) line.classList.add('above');
-                            if (i === 2) line.classList.add('below');
-                        });
+                        line.classList.add('active');
+                        // 到达最后一行时触发爱心雨
+                        if (line === lines[lines.length - 1]) {
+                            createHeartRain();
+                        }
+                    } else {
+                        line.classList.remove('active');
                     }
                 });
-            }, { threshold: 0.5 });
+            }, { threshold: 0.6 });
 
-            pages.forEach(page => observer.observe(page));
+            lines.forEach(line => observer.observe(line));
         }
 
-        // 创建漂浮爱心
-        function createHearts() {
-            setInterval(() => {
+        // 点击特效
+        function initClickEffect() {
+            document.addEventListener('click', (e) => {
                 const heart = document.createElement('div');
-                heart.className = 'float-heart';
-                heart.style.left = `${Math.random() * 100}%`;
-                heart.style.animationDuration = `${6 + Math.random() * 4}s`;
+                heart.className = 'click-heart';
+                heart.style.left = `${e.clientX - 20}px`;
+                heart.style.top = `${e.clientY - 20}px`;
                 document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 8000);
-            }, 1000);
+                setTimeout(() => heart.remove(), 1000);
+            });
         }
 
-        // 结尾烟花效果
-        function addFireworks() {
-            const lastPage = document.querySelector('.lyric-page:last-child');
-            const observer = new IntersectionObserver(entries => {
-                if (entries[0].isIntersecting) {
-                    for (let i = 0; i < 30; i++) {
-                        const firework = document.createElement('div');
-                        firework.className = 'firework';
-                        firework.style.left = `${Math.random() * 100}%`;
-                        firework.style.top = `${Math.random() * 100}%`;
-                        firework.style.animationDelay = `${Math.random()}s`;
-                        lastPage.appendChild(firework);
-                        setTimeout(() => firework.remove(), 1500);
-                    }
-                }
-            }, { threshold: 0.5 });
-
-            observer.observe(lastPage);
+        // 创建爱心雨
+        function createHeartRain() {
+            for (let i = 0; i < 99; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-rain';
+                heart.innerHTML = '❤️';
+                heart.style.left = `${Math.random() * 100}%`;
+                heart.style.animation = `heartFall ${4 + Math.random() * 4}s linear`;
+                heart.style.fontSize = `${20 + Math.random() * 30}px`;
+                heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 5000);
+            }
         }
 
         // 音乐自动播放处理
         document.addEventListener('click', () => {
             const music = document.getElementById('bg-music');
-            if (music.paused) music.play().catch(() => {});
+            if (music.paused) music.play();
         });
 
         // 启动
