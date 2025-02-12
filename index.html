@@ -101,6 +101,25 @@
             mix-blend-mode: overlay;
             pointer-events: none;
         }
+
+        /* 点击时的水波纹效果 */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 107, 129, 0.5);
+            animation: ripple-animation 0.6s ease-out;
+        }
+
+        @keyframes ripple-animation {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -152,6 +171,7 @@ function init() {
     createLyrics();
     startFloatElements();
     addScrollEffect();
+    addClickEffect();
 }
 
 // 创建歌词式情书
@@ -182,10 +202,46 @@ function addScrollEffect() {
     const container = document.querySelector('.lyric-content');
     const lines = document.querySelectorAll('.lyric-line');
     container.addEventListener('scroll', () => {
-        let current = Math.floor(container.scrollTop / 100);
+        const scrollPosition = container.scrollTop;
+        const lineHeight = lines[0].offsetHeight;
+        const centerLineIndex = Math.floor(scrollPosition / lineHeight);
         lines.forEach((line, i) => {
-            line.classList.toggle('active', i === current);
+            line.classList.remove('active');
+            if (i === centerLineIndex) {
+                line.classList.add('active');
+            }
         });
+    });
+}
+
+// 点击时桃心和水波纹效果
+function addClickEffect() {
+    document.body.addEventListener('click', (event) => {
+        const ripple = document.createElement('div');
+        ripple.classList.add('ripple');
+        document.body.appendChild(ripple);
+
+        const size = Math.max(window.innerWidth, window.innerHeight);
+        const x = event.clientX - size / 2;
+        const y = event.clientY - size / 2;
+
+        ripple.style.width = `${size}px`;
+        ripple.style.height = `${size}px`;
+        ripple.style.left = `${x}px`;
+        ripple.style.top = `${y}px`;
+
+        setTimeout(() => ripple.remove(), 600);
+
+        // 生成多个桃心
+        for (let i = 0; i < 5; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.style.left = `${event.clientX + Math.random() * 50 - 25}px`;
+            heart.style.top = `${event.clientY + Math.random() * 50 - 25}px`;
+            heart.style.animationDuration = `${5 + Math.random() * 3}s`;
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
     });
 }
 
