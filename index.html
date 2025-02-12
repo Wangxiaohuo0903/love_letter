@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>给最特别的你 | 情人节快乐</title>
+    <title>情书与特效</title>
     <style>
         :root {
             --primary-color: #ff6b81;
@@ -22,7 +22,6 @@
             color: #fff;
             overflow: hidden;
             position: relative;
-            touch-action: pan-y;
         }
 
         /* 歌词式滚动容器 */
@@ -45,8 +44,6 @@
             transition: transform 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
             overflow-y: scroll;
             max-height: 80vh;
-            width: 80%;
-            scroll-behavior: smooth;
         }
 
         .lyric-line {
@@ -66,43 +63,30 @@
             color: var(--primary-color);
         }
 
-        /* 点击特效 */
-        .click-heart {
+        /* 动态漂浮元素 */
+        .float-element {
             position: absolute;
-            width: 40px;
-            height: 40px;
+            pointer-events: none;
+            animation: float 8s linear infinite;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(110vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-30vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 爱心样式 */
+        .heart {
+            width: 28px;
+            height: 28px;
             background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23ff6b81" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>');
-            animation: clickHeart 1s ease-out forwards;
-        }
-
-        @keyframes clickHeart {
-            0% { transform: scale(0); opacity: 1; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(0.5); opacity: 0; }
-        }
-
-        /* 桃心雨特效 */
-        .heart-rain {
-            position: fixed;
-            pointer-events: none;
-            animation: heartFall linear forwards;
-        }
-
-        @keyframes heartFall {
-            0% { transform: translateY(-20vh) rotate(0deg); }
-            100% { transform: translateY(120vh) rotate(360deg); }
-        }
-
-        /* 烟花样式 */
-        .firework {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
         }
 
         /* 柔光滤镜 */
@@ -120,146 +104,94 @@
     </style>
 </head>
 <body>
-    <!-- 歌词式滚动容器 -->
-    <div class="lyric-container">
-        <div class="lyric-content">
-            <!-- 此处自动生成情书内容 -->
-        </div>
+
+<!-- 情书容器 -->
+<div class="lyric-container">
+    <div class="lyric-content">
+        <!-- 此处自动生成情书内容 -->
     </div>
+</div>
 
-    <!-- 烟花元素 -->
-    <div class="firework" id="firework">
-        <img src="firework.gif" alt="烟花" />
-    </div>
+<!-- 音频播放器 -->
+<audio id="loveSong" autoplay>
+    <source src="安溥 anpu - 天高地阔.mp3" type="audio/mp3">
+    Your browser does not support the audio element.
+</audio>
 
-    <!-- 音频播放器 -->
-    <audio id="loveSong" autoplay>
-        <source src="安溥 anpu - 天高地阔.mp3" type="audio/mp3">
-        Your browser does not support the audio element.
-    </audio>
-
-    <script>
-        // 情书内容（按逗号分隔）
-        const loveLetter = `
+<script>
+// 情书内容（按逗号分隔）
+const loveLetter = `
 好喜欢的你：
-想正式的给你写一封信，
-但其实没想好要写什么，
-不能写1000字的“好喜欢你呀，你也太可爱了吧”，
-尽管可能就是想表达这个意思，
-和你在一起真的很幸福，很安心，
-不知道为什么在你身边总会让我感觉到平静，
-有可能是因为我相信你是一个很美好的人，
-你有很多我不具备的特点，
-你有一种奇妙的勇气，
-会在我不好意思找人拍照的时候挺身而出，
-会在很多时候直接告诉我你的想法，
-虽然你总说自己不会表达爱，
-但你真的让我在很多个瞬间都感受到了你的喜欢，
-让我很有安全感和幸福感，
-第一次意识到相爱真的是很美好的事情，
-我喜欢你，也相信你也喜欢我，
-我也会害怕这种喜欢会不会又成为我逃避现实的借口，
-但似乎没有，我依然在不断担心各种各样的事情，
-我希望自己的事业也有更好的发展，
-这样也能让我们的感情有更多的稳定性去面对真实的生活，
-但很幸运我们理想的生活状态都是平凡的美好，
-并不追求过多的物欲，
-我们仍有在生活之余追求浪漫的自由，
-        `.split(/，|。/).filter(line => line.trim());
+            想正式的给你写一封信，
+            但其实没想好要写什么，
+            不能写1000字的“好喜欢你呀，你也太可爱了吧”，
+            尽管可能就是想表达这个意思，
+            和你在一起真的很幸福，很安心，
+            不知道为什么在你身边总会让我感觉到平静，
+            有可能是因为我相信你是一个很美好的人，
+            你有很多我不具备的特点，
+            你有一种奇妙的勇气，
+            会在我不好意思找人拍照的时候挺身而出，
+            会在很多时候直接告诉我你的想法，
+            虽然你总说自己不会表达爱，
+            但你真的让我在很多个瞬间都感受到了你的喜欢，
+            让我很有安全感和幸福感，
+            第一次意识到相爱真的是很美好的事情，
+            我喜欢你，也相信你也喜欢我，
+            我也会害怕这种喜欢会不会又成为我逃避现实的借口，
+            但似乎没有，我依然在不断担心各种各样的事情，
+            我希望自己的事业也有更好的发展，
+            这样也能让我们的感情有更多的稳定性去面对真实的生活，
+            但很幸运我们理想的生活状态都是平凡的美好，
+            并不追求过多的物欲，
+            我们仍有在生活之余追求浪漫的自由，
+`.split(/，|。/).filter(line => line.trim());
 
-        // 初始化
-        function init() {
-            createLyrics();
-            addClickEffect();
-            addScrollEffect();
-            addFireworkEffect();
-        }
+// 初始化
+function init() {
+    createLyrics();
+    startFloatElements();
+    addScrollEffect();
+}
 
-        // 创建歌词式情书
-        function createLyrics() {
-            const container = document.querySelector('.lyric-content');
-            loveLetter.forEach((text, index) => {
-                const p = document.createElement('p');
-                p.className = 'lyric-line';
-                p.textContent = text.trim();
-                container.appendChild(p);
-            });
-        }
+// 创建歌词式情书
+function createLyrics() {
+    const container = document.querySelector('.lyric-content');
+    loveLetter.forEach((text, index) => {
+        const p = document.createElement('p');
+        p.className = 'lyric-line';
+        p.textContent = text.trim();
+        container.appendChild(p);
+    });
+}
 
-        // 点击特效
-        function addClickEffect() {
-            document.addEventListener('click', (e) => {
-                const heart = document.createElement('div');
-                heart.className = 'click-heart';
-                heart.style.left = `${e.clientX - 20}px`;
-                heart.style.top = `${e.clientY - 20}px`;
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 1000);
-            });
-        }
+// 动态漂浮元素
+function startFloatElements() {
+    setInterval(() => {
+        const elem = document.createElement('div');
+        elem.className = 'float-element heart';
+        elem.style.left = `${Math.random() * 100}%`;
+        elem.style.animationDuration = `${6 + Math.random() * 4}s`;
+        document.body.appendChild(elem);
+        setTimeout(() => elem.remove(), 8000);
+    }, 1000);
+}
 
-        // 滚动特效
-        function addScrollEffect() {
-            const container = document.querySelector('.lyric-content');
-            const lines = document.querySelectorAll('.lyric-line');
-            container.addEventListener('scroll', () => {
-                const scrollTop = container.scrollTop;
-                const containerHeight = container.clientHeight;
-                const scrollHeight = container.scrollHeight;
+// 滚动效果
+function addScrollEffect() {
+    const container = document.querySelector('.lyric-content');
+    const lines = document.querySelectorAll('.lyric-line');
+    container.addEventListener('scroll', () => {
+        let current = Math.floor(container.scrollTop / 100);
+        lines.forEach((line, i) => {
+            line.classList.toggle('active', i === current);
+        });
+    });
+}
 
-                // 高亮当前行
-                lines.forEach((line, index) => {
-                    const lineTop = line.offsetTop;
-                    const lineHeight = line.offsetHeight;
-                    if (lineTop <= scrollTop + containerHeight / 2 && lineTop + lineHeight > scrollTop + containerHeight / 2) {
-                        line.classList.add('active');
-                    } else {
-                        line.classList.remove('active');
-                    }
-                });
+// 启动
+init();
+</script>
 
-                // 触发桃心雨
-                if (scrollTop + containerHeight >= scrollHeight - 50) {
-                    createHeartRain();
-                }
-            });
-        }
-
-        // 创建桃心雨
-        function createHeartRain() {
-            for (let i = 0; i < 99; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'heart-rain';
-                heart.innerHTML = '❤️';
-                heart.style.left = `${Math.random() * 100}%`;
-                heart.style.animation = `heartFall ${4 + Math.random() * 4}s linear`;
-                heart.style.fontSize = `${20 + Math.random() * 30}px`;
-                heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-                document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 5000);
-            }
-        }
-
-        // 烟花效果
-        function addFireworkEffect() {
-            const container = document.querySelector('.lyric-content');
-            container.addEventListener('scroll', () => {
-                const scrollTop = container.scrollTop;
-                const containerHeight = container.clientHeight;
-                const scrollHeight = container.scrollHeight;
-
-                // 在中间位置显示烟花
-                if (scrollTop + containerHeight / 2 >= scrollHeight / 2) {
-                    document.getElementById('firework').style.display = 'block';
-                    setTimeout(() => {
-                        document.getElementById('firework').style.display = 'none';
-                    }, 3000);
-                }
-            });
-        }
-
-        // 启动
-        init();
-    </script>
 </body>
 </html>
