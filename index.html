@@ -314,11 +314,7 @@
     // 点击效果
     function setupClick() {
         document.body.addEventListener('click', (e) => {
-            // 单次音乐播放
-            if (!isMusicPlayed) {
-                document.getElementById('loveSong').play();
-                isMusicPlayed = true;
-            }
+            
 
             // 创建点击桃心
             const heart = document.createElement('div');
@@ -331,11 +327,13 @@
     }
 
     // 音乐处理
+
     function setupMusic() {
-        const audio = document.getElementById('loveSong');
-        audio.volume = 0.5;
-        audio.loop = true;
-    }
+    const audio = document.getElementById('loveSong');
+    audio.volume = 0.5;
+    audio.loop = true;
+    audio.play(); // 自动播放音乐
+}
 
 function startHeartRain() {
     setInterval(() => {
