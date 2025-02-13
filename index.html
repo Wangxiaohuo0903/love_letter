@@ -336,61 +336,49 @@
         audio.loop = true;
     }
 
-    // 常态桃心雨
-    function startHeartRain() {
-        setInterval(() => {
-            const heart = document.createElement('div');
-            heart.className = 'heart-rain';
-            heart.style.left = `${Math.random() * 100}%`;
-            heart.style.animationDuration = `${4 + Math.random() * 4}s`;
-            heart.style.fontSize = `${20 + Math.random() * 20}px`;
-            heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 5000);
-        }, 300); // 每秒生成一个桃心
-    }
-
-    // 创建桃心
-// 创建桃心
-function createHeart(config = {}) {
-    const heart = document.createElement('div');
-    heart.className = 'heart-rain';
-    heart.style.left = `${Math.random() * 100}%`;
-    heart.style.animationDuration = `${config.speed || 4}s`;
-    heart.style.width = `${config.size || 28}px`;
-    heart.style.height = `${config.size || 28}px`;
-    heart.style.backgroundColor = config.color || '#ff69b4';  // 默认粉红色
-    heart.style.borderRadius = '50%';  // 让它成为圆形
-    heart.style.position = 'absolute';  // 确保它不被父元素影响
-    heart.style.top = '-50px';  // 初始位置设为视口外
-    heart.style.filter = `hue-rotate(${Math.random() * 360}deg)`;  // 随机色调
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 5000);  // 5秒后移除
+function startHeartRain() {
+    setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart-rain';
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${4 + Math.random() * 4}s`;
+        heart.style.fontSize = `${20 + Math.random() * 20}px`;
+        heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+        document.body.appendChild(heart);
+        setTimeout(() => heart.remove(), 5000);
+    }, 200); // 每0.1秒生成一个桃心，增加生成频率
 }
 
 // 最终特效
 function createFinalEffect(config = {}) {
     // 大量桃心雨
+    setInterval(() => {
+        createHeart({
+            speed: 2, // 加快速度
+            size: 35, // 增大桃心
+            color: '#ff6b81' // 固定粉红色
+        });
+    }, 50); // 每0.05秒生成一个桃心，增加频率
     
-        // 5秒后掉落粉红色“我爱你”
-        setTimeout(() => {
-            const texts = ["我", "爱", "你"];
-            for (let i = 0; i < 100; i++) {
-                setTimeout(() => {
-                    const love = document.createElement('div');
-                    love.className = 'love-text';
-                    love.textContent = texts[i % 3];
-                    love.style.left = `${Math.random() * 95}%`;
-                    love.style.fontSize = `${24 + Math.random() * 24}px`;
-                    love.style.animationDuration = `${3 + Math.random() * 2}s`;
-                    document.body.appendChild(love);
-                    
-                    // 自动清理
-                    setTimeout(() => love.remove(), 4000);
-                }, i * 50);
-            }
-        }, 2000); // 5秒后触发
-    }
+    // 5秒后掉落粉红色“我爱你”
+    setTimeout(() => {
+        const texts = ["我", "爱", "你"];
+        for (let i = 0; i < 50; i++) {
+            setTimeout(() => {
+                const love = document.createElement('div');
+                love.className = 'love-text';
+                love.textContent = texts[i % 3];
+                love.style.left = `${Math.random() * 95}%`;
+                love.style.fontSize = `${24 + Math.random() * 24}px`;
+                love.style.animationDuration = `${3 + Math.random() * 2}s`;
+                document.body.appendChild(love);
+                
+                // 自动清理
+                setTimeout(() => love.remove(), 4000);
+            }, i * 50);
+        }
+    }, 2000); // 2秒后触发掉落“我爱你”
+}
 
     // 启动
     init();
