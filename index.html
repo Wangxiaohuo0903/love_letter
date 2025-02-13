@@ -364,7 +364,7 @@ function createFinalEffect(config = {}) {
     // 持续掉落粉红色“我爱你”
     setInterval(() => {
         const texts = ["我", "爱", "你"];
-        for (let i = 0; i < 70; i++) { // 每次增加多个“我爱你”
+        for (let i = 0; i < 10; i++) { // 每次增加多个“我爱你”
             setTimeout(() => {
                 const love = document.createElement('div');
                 love.className = 'love-text';
@@ -378,7 +378,7 @@ function createFinalEffect(config = {}) {
                 setTimeout(() => love.remove(), 4000);
             }, i * 50); // 每50ms掉落一个“我爱你”
         }
-    }, 200); // 每0.5秒生成多个“我爱你”
+    }, 300); // 每0.5秒生成多个“我爱你”
 }
 
 
