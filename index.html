@@ -350,6 +350,7 @@ function startHeartRain() {
 }
 
 // 最终特效
+// 最终特效
 function createFinalEffect(config = {}) {
     // 大量桃心雨
     setInterval(() => {
@@ -360,10 +361,10 @@ function createFinalEffect(config = {}) {
         });
     }, 50); // 每0.05秒生成一个桃心，增加频率
     
-    // 5秒后掉落粉红色“我爱你”
-    setTimeout(() => {
+    // 持续掉落粉红色“我爱你”
+    setInterval(() => {
         const texts = ["我", "爱", "你"];
-        for (let i = 0; i < 5000; i++) {
+        for (let i = 0; i < 70; i++) { // 每次增加多个“我爱你”
             setTimeout(() => {
                 const love = document.createElement('div');
                 love.className = 'love-text';
@@ -375,10 +376,11 @@ function createFinalEffect(config = {}) {
                 
                 // 自动清理
                 setTimeout(() => love.remove(), 4000);
-            }, i * 50);
+            }, i * 50); // 每50ms掉落一个“我爱你”
         }
-    }, 2000); // 2秒后触发掉落“我爱你”
+    }, 200); // 每0.5秒生成多个“我爱你”
 }
+
 
     // 启动
     init();
