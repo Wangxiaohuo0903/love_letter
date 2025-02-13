@@ -347,7 +347,7 @@
             heart.style.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), 5000);
-        }, 1000); // 每秒生成一个桃心
+        }, 300); // 每秒生成一个桃心
     }
 
     // 创建桃心
@@ -371,21 +371,11 @@ function createHeart(config = {}) {
 // 最终特效
 function createFinalEffect(config = {}) {
     // 大量桃心雨
-    for (let i = 0; i < 99; i++) {
-        setTimeout(() => {
-            createHeart({
-                size: 30 + Math.random() * 30,
-                speed: 2 + Math.random() * 3,
-                color: config.color
-            });
-        }, i * 20);
-    }
-
-
+    
         // 5秒后掉落粉红色“我爱你”
         setTimeout(() => {
             const texts = ["我", "爱", "你"];
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 100; i++) {
                 setTimeout(() => {
                     const love = document.createElement('div');
                     love.className = 'love-text';
